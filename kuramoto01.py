@@ -52,37 +52,6 @@ init_state = np.append(x0, [y0 , z0])
 #Solução do modelo
 sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W), s, init_state)
 
-#Construção do vetor rho e dos vetores ponto fixo
-rho = np.zeros(3)
-for k in range(N):
-    rho = rho + np.array([sol.y[k,0],sol.y[k+N,0],sol.y[k+2*N,0]])
-
-nrho = np.linalg.norm(rho)
-rho = rho/nrho
-
-mi = np.zeros(N)
-for k in range(N):
-    mi[k] = W[k]/(K*nrho)
-
-w = np.zeros((N, 3))
-for i in range(N):
-    w[i,:] = np.array([W[i], W[i], W[i]])/np.linalg.norm(np.array([W[i], W[i], W[i]]))
-
-tal = np.zeros((N,2))
-for i in range(N):    
-    tal[i, 0] = + (((1 - mi[i]**2)+((mi[i]**2 - 1)**2+4*(mi[i]**2)*(np.dot(rho, w[i,:]))**2)**(1/2))/2)**(1/2)
-    tal[i, 1] = - (((1 - mi[i]**2)+((mi[i]**2 - 1)**2+4*(mi[i]**2)*(np.dot(rho, w[i,:]))**2)**(1/2))/2)**(1/2)
-
-ep = np.zeros((N, 2))
-for i in range(N):
-    ep[i, 0] = np.inner(rho, w[i,:])/tal[i, 0]
-    ep[i, 1] = np.inner(rho, w[i,:])/tal[i, 1]
-
-sigmaf = np.zeros((N,6))
-for i in range(N):
-    sigmaf[i,0:3] = (1/(1+(ep[i,0]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[i,:],rho))+(ep[i,0]*(mi[i]**2)*w[i,:])+(tal[i,0]*rho))
-    sigmaf[i,3:6] =(1/(1+(ep[i,1]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[i,:],rho))+(ep[i,1]*(mi[i]**2)*w[i,:])+(tal[i,1]*rho))
-
 for i in range(int(sol.y.shape[1])): #t+1
     #Construção do vetor rho e dos vetores ponto fixo
     rho = np.zeros(3)
