@@ -60,9 +60,7 @@ def kuramoto02(t, y, K, N, A, W):
 
 #Parâmetros.
 N = 10
-t = 30
-T = 3000
-s = np.arange(0, T, t)
+s = [0, 300]
 K = 2
 mu = 0
 delta = 0.1
@@ -80,10 +78,10 @@ z0 = np.cos(phi)
 init_state = np.append(x0, [y0 , z0])
 
 #Solução com kuramoto01
-sol1 = solve_ivp(lambda t, y: kuramoto01(t, y, K, N, A, W), s, init_state, method='BDF')
+sol1 = solve_ivp(lambda t, y: kuramoto01(t, y, K, N, A, W), s, init_state)
 
 #Solução com kuramoto02
-sol2 =solve_ivp(lambda t, y: kuramoto02(t, y, K, N, A, W), s, init_state, method='BDF')
+sol2 =solve_ivp(lambda t, y: kuramoto02(t, y, K, N, A, W), s, init_state)
 
 for i in range(int(sol1.y.shape[1])): #t+1
     #Construção do vetor rho e dos vetores ponto fixo
@@ -147,7 +145,9 @@ for i in range(int(sol1.y.shape[1])): #t+1
     plt.suptitle('{} individuals - t={}.'.format(N,np.round(sol1.t[i],2)), size=40)
     
     if i < 10:
-        plt.savefig('frames01/0{}.png'.format(int(i)))
+        plt.savefig('frames01/00{}.png'.format(i))
+    elif 9 < i < 100:
+        plt.savefig('frames01/0{}.png'.format(i))
     else:
         plt.savefig('frames01/{}.png'.format(int(i)))
     plt.close()
@@ -214,6 +214,8 @@ for i in range(int(sol2.y.shape[1])): #t+1
     plt.suptitle('{} individuals - t={}.'.format(N,np.round(sol2.t[i],2)), size=40)
     
     if i < 10:
+        plt.savefig('frames02/00{}.png'.format(i))
+    elif 9 < i < 100:
         plt.savefig('frames02/0{}.png'.format(i))
     else:
         plt.savefig('frames02/{}.png'.format(i))

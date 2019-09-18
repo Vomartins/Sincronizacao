@@ -113,6 +113,8 @@ for i in range(int(sol.y.shape[1])): #t+1
     plt.suptitle('{} individuals - t={}.'.format(N,np.round(sol.t[i],2)), size=40)
     
     if i < 10:
+        plt.savefig('frames02/00{}.png'.format(i))
+    elif 9 < i < 100:
         plt.savefig('frames02/0{}.png'.format(i))
     else:
         plt.savefig('frames02/{}.png'.format(i))
