@@ -32,9 +32,7 @@ def kuramoto(t, y, K, N, A, W):
 
 #Parâmetros.
 N = 10
-t = 30
-T = 3000
-s = np.arange(0, T, t)
+s = [0, 100]
 K = 2
 mu = 0
 delta = 0.1
@@ -112,7 +110,7 @@ for i in range(int(sol.y.shape[1])): #t+1
         ax1 = fig.gca(projection='3d')
         ax1.scatter(x[j], y[j], z[j], c='k',s=50)
     
-    plt.suptitle('{} individuals - t={}.'.format(N,int(t*i)), size=40)
+    plt.suptitle('{} individuals - t={}.'.format(N,np.round(sol.t[i],2)), size=40)
     
     if i < 10:
         plt.savefig('frames02/0{}.png'.format(i))
