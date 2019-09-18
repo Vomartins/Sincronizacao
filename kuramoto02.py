@@ -51,42 +51,42 @@ z0 = np.cos(phi)
 
 init_state = np.append(x0, [y0 , z0])
 #Solução do modelo
-sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W), s, init_state, method='BDF')
+sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W), s, init_state)
 
-#Construção do vetor rho e dos vetores ponto fixo
-rho = np.zeros(3)
-for k in range(N):
-    rho = rho + np.array([sol.y[k,0],sol.y[k+N,0],sol.y[k+2*N,0]])
-
-nrho = np.linalg.norm(rho)
-rho = rho/nrho
-
-mi = np.zeros(N)
-for k in range(N):
-    mi[k] = W[k]/(K*nrho)
-
-w = np.zeros((N, 3))
-for i in range(N):
-    w[i,:] = np.array([W[i], W[i], W[i]])/np.linalg.norm(np.array([W[i], W[i], W[i]]))
-
-tal = np.zeros((N,2))
-for i in range(N):    
-    tal[i, 0] = + (((1 - mi[i]**2)+((mi[i]**2 - 1)**2+4*(mi[i]**2)*(np.dot(rho, w[i,:]))**2)**(1/2))/2)**(1/2)
-    tal[i, 1] = - (((1 - mi[i]**2)+((mi[i]**2 - 1)**2+4*(mi[i]**2)*(np.dot(rho, w[i,:]))**2)**(1/2))/2)**(1/2)
-
-ep = np.zeros((N, 2))
-for i in range(N):
-    ep[i, 0] = np.inner(rho, w[i,:])/tal[i, 0]
-    ep[i, 1] = np.inner(rho, w[i,:])/tal[i, 1]
-
-sigmaf = np.zeros((N,6))
-for i in range(N):
-    sigmaf[i,0:3] = (1/(1+(ep[i,0]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[i,:],rho))+(ep[i,0]*(mi[i]**2)*w[i,:])+(tal[i,0]*rho))
-    sigmaf[i,3:6] =(1/(1+(ep[i,1]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[i,:],rho))+(ep[i,1]*(mi[i]**2)*w[i,:])+(tal[i,1]*rho))
-
-#Plot dos frames
 for i in range(int(sol.y.shape[1])): #t+1
     
+    #Construção do vetor rho e dos vetores ponto fixo
+    rho = np.zeros(3)
+    for k in range(N):
+        rho = rho + np.array([sol.y[k,i],sol.y[k+N,i],sol.y[k+2*N,i]])
+
+    nrho = np.linalg.norm(rho)
+    rho = rho/nrho
+
+    mi = np.zeros(N)
+    for k in range(N):
+        mi[k] = W[k]/(K*nrho)
+
+    w = np.zeros((N, 3))
+    for k in range(N):
+        w[k,:] = np.array([W[k], W[k], W[k]])/np.linalg.norm(np.array([W[k], W[k], W[k]]))
+
+    tal = np.zeros((N,2))
+    for k in range(N):    
+        tal[k, 0] = + (((1 - mi[k]**2)+((mi[k]**2 - 1)**2+4*(mi[k]**2)*(np.dot(rho, w[k,:]))**2)**(1/2))/2)**(1/2)
+        tal[k, 1] = - (((1 - mi[k]**2)+((mi[k]**2 - 1)**2+4*(mi[k]**2)*(np.dot(rho, w[k,:]))**2)**(1/2))/2)**(1/2)
+
+    ep = np.zeros((N, 2))
+    for k in range(N):
+        ep[k, 0] = np.inner(rho, w[k,:])/tal[k, 0]
+        ep[k, 1] = np.inner(rho, w[k,:])/tal[k, 1]
+
+    sigmaf = np.zeros((N,6))
+    for k in range(N):
+        sigmaf[k,0:3] = (1/(1+(ep[k,0]**2)*(mi[k]**2)))*((mi[k]*np.cross(w[k,:],rho))+(ep[k,0]*(mi[k]**2)*w[k,:])+(tal[k,0]*rho))
+        sigmaf[k,3:6] =(1/(1+(ep[k,1]**2)*(mi[k]**2)))*((mi[k]*np.cross(w[k,:],rho))+(ep[k,1]*(mi[k]**2)*w[k,:])+(tal[k,1]*rho))
+    
+    #Plot dos frames
     x = sol.y[0:N,i]
     y = sol.y[N:2*N,i]
     z = sol.y[2*N:3*N,i]

@@ -33,10 +33,8 @@ def kuramoto(t, y, K, N, A, W):
 
 #Parâmetros.
 N = 10
-t = 30
-T = 3000
-s = np.arange(0, T, t)
-K = 2
+s = [0, 100]
+K = 1
 mu = 0
 delta = 0.1
 A = np.full((N,N), 1)
@@ -52,7 +50,7 @@ z0 = np.cos(phi)
 
 init_state = np.append(x0, [y0 , z0])
 #Solução do modelo
-sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W), s, init_state, method='BDF')
+sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W), s, init_state)
 
 #Construção do vetor rho e dos vetores ponto fixo
 rho = np.zeros(3)
@@ -85,8 +83,39 @@ for i in range(N):
     sigmaf[i,0:3] = (1/(1+(ep[i,0]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[i,:],rho))+(ep[i,0]*(mi[i]**2)*w[i,:])+(tal[i,0]*rho))
     sigmaf[i,3:6] =(1/(1+(ep[i,1]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[i,:],rho))+(ep[i,1]*(mi[i]**2)*w[i,:])+(tal[i,1]*rho))
 
-#Plot dos frames
 for i in range(int(sol.y.shape[1])): #t+1
+    #Construção do vetor rho e dos vetores ponto fixo
+    rho = np.zeros(3)
+    for k in range(N):
+        rho = rho + np.array([sol.y[k,i],sol.y[k+N,i],sol.y[k+2*N,i]])
+
+    nrho = np.linalg.norm(rho)
+    rho = rho/nrho
+
+    mi = np.zeros(N)
+    for k in range(N):
+        mi[k] = W[k]/(K*nrho)
+
+    w = np.zeros((N, 3))
+    for k in range(N):
+        w[k,:] = np.array([W[k], W[k], W[k]])/np.linalg.norm(np.array([W[k], W[k], W[k]]))
+
+    tal = np.zeros((N,2))
+    for k in range(N):    
+        tal[k, 0] = + (((1 - mi[k]**2)+((mi[k]**2 - 1)**2+4*(mi[k]**2)*(np.dot(rho, w[k,:]))**2)**(1/2))/2)**(1/2)
+        tal[k, 1] = - (((1 - mi[k]**2)+((mi[k]**2 - 1)**2+4*(mi[k]**2)*(np.dot(rho, w[k,:]))**2)**(1/2))/2)**(1/2)
+
+    ep = np.zeros((N, 2))
+    for k in range(N):
+        ep[k, 0] = np.inner(rho, w[k,:])/tal[k, 0]
+        ep[k, 1] = np.inner(rho, w[k,:])/tal[k, 1]
+
+    sigmaf = np.zeros((N,6))
+    for k in range(N):
+        sigmaf[k,0:3] = (1/(1+(ep[k,0]**2)*(mi[k]**2)))*((mi[k]*np.cross(w[k,:],rho))+(ep[k,0]*(mi[k]**2)*w[k,:])+(tal[k,0]*rho))
+        sigmaf[k,3:6] =(1/(1+(ep[k,1]**2)*(mi[k]**2)))*((mi[k]*np.cross(w[k,:],rho))+(ep[k,1]*(mi[k]**2)*w[k,:])+(tal[k,1]*rho))
+    
+    #Plot dos frames
     
     x = sol.y[0:N,i]
     y = sol.y[N:2*N,i]
@@ -113,10 +142,10 @@ for i in range(int(sol.y.shape[1])): #t+1
         ax1 = fig.gca(projection='3d')
         ax1.scatter(x[j], y[j], z[j], c='k',s=50)
     
-    plt.suptitle('{} individuals - t={}.'.format(N,int(t*i)), size=40)
+    plt.suptitle('{} individuals - t={}.'.format(N,np.round(sol.t[i],2)), size=40)
     
     if i < 10:
-        plt.savefig('frames01/0{}.png'.format(i))
+        plt.savefig('frames01/0{}.png'.format(int(i)))
     else:
-        plt.savefig('frames01/{}.png'.format(i))
+        plt.savefig('frames01/{}.png'.format(int(i)))
     plt.close()
