@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.integrate import solve_ivp
+#Criar uma pasta chamada frames01 onde o programa estiver salvo para as figuras
 
 #Modelo de Kuramoto
 def kuramoto(t, y, K, N, A, W):
@@ -11,10 +12,11 @@ def kuramoto(t, y, K, N, A, W):
     for i in range(N):
         for j in range(N):
             d[i] = d[i] + A[i][j] 
+    
     dydt = np.zeros(3*N)    
     
     for i in range(N):
-        w = np.random.normal(0, 0.1)
+        w = W[i]
         rho = np.zeros(3)
         for j in range(N):
             rho = rho + np.array([A[i][j]*sigma[j], A[i][j]*sigma[j+N], A[i][j]*sigma[j+2*N]])
@@ -50,7 +52,7 @@ z0 = np.cos(phi)
 
 init_state = np.append(x0, [y0 , z0])
 #Solução do modelo
-sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W), s, init_state)
+sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W), s, init_state, method='BDF')
 
 #Construção do vetor rho e dos vetores ponto fixo
 rho = np.zeros(3)
@@ -84,7 +86,7 @@ for i in range(N):
     sigmaf[i,3:6] =(1/(1+(ep[i,1]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[i,:],rho))+(ep[i,1]*(mi[i]**2)*w[i,:])+(tal[i,1]*rho))
 
 #Plot dos frames
-for i in range(int(T/t)): #t+1
+for i in range(int(sol.y.shape[1])): #t+1
     
     x = sol.y[0:N,i]
     y = sol.y[N:2*N,i]
@@ -114,7 +116,7 @@ for i in range(int(T/t)): #t+1
     plt.suptitle('{} individuals - t={}.'.format(N,int(t*i)), size=40)
     
     if i < 10:
-        plt.savefig('frames/0{}.png'.format(i))
+        plt.savefig('frames01/0{}.png'.format(i))
     else:
-        plt.savefig('frames/{}.png'.format(i))
+        plt.savefig('frames01/{}.png'.format(i))
     plt.close()
