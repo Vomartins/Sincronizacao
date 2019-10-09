@@ -10,22 +10,41 @@ def kuramoto(t, y, K, N, A, W, w):
     x = y
     
     dydt = np.zeros(3*N)
+    
     for i in range(N):
         a = np.array([x[i], x[i+N], x[i+2*N]])
+        s = 0
         for j in range(N):
             b = np.array([x[j], x[j+N], x[j+2*N]])
-            s_0 = x[j] - np.inner(b,a)*x[i]
-            s_1 = x[j+N] - np.inner(b,a)*x[i+N]
-            s_2 = x[j+2*N] - np.inner(b,a)*x[i+2*N]
-        dydt[i] = (K/N)*s_0 + np.cross(W[i]*w[:,i],a)[0]
-        dydt[i+N] = (K/N)*s_1 + np.cross(W[i]*w[:,i],a)[1]
-        dydt[i+2*N] = (K/N)*s_2 + np.cross(W[i]*w[:,i],a)[2]
+            s = s + b - np.inner(b,a)*a
+            
+        dydt[i] = (K/N)*s[0] + np.cross(W[i]*w[:,i],a)[0]
+        dydt[i+N] = (K/N)*s[1] + np.cross(W[i]*w[:,i],a)[1]
+        dydt[i+2*N] = (K/N)*s[2] + np.cross(W[i]*w[:,i],a)[2]
+        
     return dydt
 
+def kuramotoPF(y, K, N, A, W, w):
+    x = y
+    
+    dydt = np.zeros(3*N)
+    
+    for i in range(N):
+        a = np.array([x[i], x[i+N], x[i+2*N]])
+        s = 0
+        for j in range(N):
+            b = np.array([x[j], x[j+N], x[j+2*N]])
+            s = s + b - np.inner(b,a)*a
+            
+        dydt[i] = (K/N)*s[0] + np.cross(W[i]*w[:,i],a)[0]
+        dydt[i+N] = (K/N)*s[1] + np.cross(W[i]*w[:,i],a)[1]
+        dydt[i+2*N] = (K/N)*s[2] + np.cross(W[i]*w[:,i],a)[2]
+        
+    return dydt
 #Parâmetros.
-N = 30
-s = [0, 300]
-K = 2
+N = 10
+s = [0, 100]
+K = 0.8
 mu = 0
 delta = 0.5
 A = np.full((N,N), 1)
@@ -55,35 +74,20 @@ z0 = np.cos(phi)
 init_state = np.append(x0, [y0 , z0])
 #Solução do modelo
 sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W, w), s, init_state)
+#pontos fixos
+chute_inicial = init_state
+pontos_fixos = newton_krylov(lambda y: kuramotoPF(y, K, N, A, W, w),chute_inicial)
 
-#Construção do vetor rho e dos vetores ponto fixo
-rho = np.zeros(3)
-for k in range(N):
-    rho = rho + np.array([sol.y[k,-1],sol.y[k+N,-1],sol.y[k+2*N,-1]])
-rho = (1/N)*rho
-nrho = np.linalg.norm(rho)
-rho = rho/nrho
+x_f = pontos_fixos[0:N]
+y_f = pontos_fixos[N:2*N]
+z_f = pontos_fixos[2*N:3*N]
 
-mi = np.zeros(N)
-for k in range(N):
-    mi[k] = W[k]/(K*nrho)
-
-tal = np.zeros((N,2))
-for i in range(N):    
-    tal[i, 0] = + (((1 - mi[i]**2)+((mi[i]**2 - 1)**2+4*(mi[i]**2)*(np.dot(rho, w[:,i]))**2)**(1/2))/2)**(1/2)
-    tal[i, 1] = - (((1 - mi[i]**2)+((mi[i]**2 - 1)**2+4*(mi[i]**2)*(np.dot(rho, w[:,i]))**2)**(1/2))/2)**(1/2)
-
-ep = np.zeros((N, 2))
+d = np.zeros(N)
 for i in range(N):
-    ep[i, 0] = np.inner(rho, w[:,i])/tal[i, 0]
-    ep[i, 1] = np.inner(rho, w[:,i])/tal[i, 1]
+    d[i] = x_f[i]**2 + y_f[i]**2 + z_f[i]**2
+print(d)
 
-sigmaf = np.zeros((N,6))
-for i in range(N):
-    sigmaf[i,0:3] = (1/(1+(ep[i,0]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[:,i],rho))+(ep[i,0]*(mi[i]**2)*w[:,i])+(tal[i,0]*rho))
-    sigmaf[i,3:6] =(1/(1+(ep[i,1]**2)*(mi[i]**2)))*((mi[i]*np.cross(w[:,i],rho))+(ep[i,1]*(mi[i]**2)*w[:,i])+(tal[i,1]*rho))
-
-for i in range(int(sol.y.shape[1])): #t+1
+for i in range(int(sol.y.shape[1])):
     #Plot dos frames
     
     x = sol.y[0:N,i]
@@ -102,10 +106,7 @@ for i in range(int(sol.y.shape[1])): #t+1
     fig = plt.figure(figsize=(10,10))
     ax = fig.gca(projection ='3d')
     ax.plot_wireframe(X, Y, Z, color='0.75', alpha='0.4')
-    ax.scatter(sigmaf[:,0],sigmaf[:,1],sigmaf[:,2], c='b', s=50)
-    ax.scatter(sigmaf[:,3],sigmaf[:,4],sigmaf[:,5], c='r', s=50)
-    #ax0 = fig.gca(projection='3d')
-    #ax0.scatter(rho[0], rho[1], rho[2], c='r',s=50)
+    ax.scatter(x_f,y_f,z_f, c='b', s=50)
     
     for j in range(N):
         ax1 = fig.gca(projection='3d')
