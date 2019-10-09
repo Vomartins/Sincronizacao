@@ -24,23 +24,6 @@ def kuramoto(t, y, K, N, A, W, w):
         
     return dydt
 
-def kuramotoPF(y, K, N, A, W, w):
-    x = y
-    
-    dydt = np.zeros(3*N)
-    
-    for i in range(N):
-        a = np.array([x[i], x[i+N], x[i+2*N]])
-        s = 0
-        for j in range(N):
-            b = np.array([x[j], x[j+N], x[j+2*N]])
-            s = s + b - np.inner(b,a)*a
-            
-        dydt[i] = (K/N)*s[0] + np.cross(W[i]*w[:,i],a)[0]
-        dydt[i+N] = (K/N)*s[1] + np.cross(W[i]*w[:,i],a)[1]
-        dydt[i+2*N] = (K/N)*s[2] + np.cross(W[i]*w[:,i],a)[2]
-        
-    return dydt
 #Parâmetros.
 N = 10
 s = [0, 100]
@@ -76,7 +59,7 @@ init_state = np.append(x0, [y0 , z0])
 sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W, w), s, init_state)
 #pontos fixos
 chute_inicial = init_state
-pontos_fixos = newton_krylov(lambda y: kuramotoPF(y, K, N, A, W, w),chute_inicial)
+pontos_fixos = newton_krylov(lambda y: kuramoto(s, y, K, N, A, W, w),chute_inicial)
 
 x_f = pontos_fixos[0:N]
 y_f = pontos_fixos[N:2*N]
