@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.integrate import solve_ivp
-from scipy.optimize import newton_krylov
+from scipy.optimize import broyden1
 #Criar uma pasta chamada frames01 onde o programa estiver salvo para as figuras
 
 #Modelo de Kuramoto
@@ -60,16 +60,41 @@ init_state = np.append(x0, [y0 , z0])
 sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W, w), s, init_state)
 #pontos fixos
 chute_inicial = init_state
-pontos_fixos = newton_krylov(lambda y: kuramoto(s, y, K, N, A, W, w),chute_inicial)
+pontos_fixos = broyden1(lambda y: kuramoto(s, y, K, N, A, W, w),chute_inicial)
 
-x_f = pontos_fixos[0:N]
-y_f = pontos_fixos[N:2*N]
-z_f = pontos_fixos[2*N:3*N]
+rho = np.zeros(3)
+for i in range(N):
+    a = np.array([sol.y[i,-1],sol.y[i+N,-1],sol.y[i+2*N,-1]])
+    rho = rho + a
+rho = (1/N)*rho
 
+x_i = np.array([])
+y_i = np.array([])
+z_i = np.array([])
+x_e = np.array([])
+y_e = np.array([])
+z_e = np.array([])
+
+for i in range(N):
+    a = np.array([pontos_fixos[i],pontos_fixos[i+N],pontos_fixos[i+2*N]])
+    prod_int = np.inner(a,rho)
+    if prod_int < 0 :
+        x_i = np.append(x_i, pontos_fixos[i])
+        y_i = np.append(y_i, pontos_fixos[i+N])
+        z_i = np.append(z_i, pontos_fixos[i+2*N])
+    elif prod_int > 0 :
+        x_e = np.append(x_e, pontos_fixos[i])
+        y_e = np.append(y_e, pontos_fixos[i+N])
+        z_e = np.append(z_e, pontos_fixos[i+2*N])
+        
+x = np.append(x_i, x_e)
+y = np.append(y_i, y_e)
+z = np.append(z_i, z_e)
+    
 d = np.zeros(N)
 for i in range(N):
-    d[i] = x_f[i]**2 + y_f[i]**2 + z_f[i]**2
-print(d)
+    d[i] = x[i]**2 + y[i]**2 + z[i]**2
+print(d) 
 
 for i in range(int(sol.y.shape[1])):
     #Plot dos frames
@@ -90,7 +115,10 @@ for i in range(int(sol.y.shape[1])):
     fig = plt.figure(figsize=(10,10))
     ax = fig.gca(projection ='3d')
     ax.plot_wireframe(X, Y, Z, color='0.75', alpha='0.4')
-    ax.scatter(x_f,y_f,z_f, c='b', s=50)
+    ax.scatter(x_e,y_e,z_e, c='b', s=50)
+    ax.scatter(x_i,y_i,z_i, c='r', s=50)
+    ax.text2D(0.3, 0.2, 'K={}\nN={}\nMean={}\nStdv={}'.format(K,N,mu,delta), transform=ax.transAxes)
+    plt.axis('off')
     
     for j in range(N):
         ax1 = fig.gca(projection='3d')
