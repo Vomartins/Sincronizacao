@@ -8,7 +8,7 @@ from scipy.optimize import broyden1
 
 np.random.seed(137)
 #Modelo de Kuramoto
-def kuramoto(t, y, K, N, A, W, w):
+def kuramoto(t, y, K, N, W, w):
     x = y
     
     dydt = np.zeros(3*N)    
@@ -18,7 +18,7 @@ def kuramoto(t, y, K, N, A, W, w):
         a = np.array([x[i],x[i+N],x[i+2*N]])
         for j in range(N):
             b = np.array([x[j],x[j+N],x[j+2*N]])
-            rho = rho + A[i,j]*b
+            rho = rho + b
         rho = (1/N)*rho
         
         dydt[i] = K*(rho[0] - np.inner(rho,a)*x[i]) + np.cross(W[i]*w[:,i],a)[0]
@@ -29,11 +29,10 @@ def kuramoto(t, y, K, N, A, W, w):
 
 #Parâmetros.
 N = 10
-s = [0, 100]
+s = [0, 300]
 K = 0.8
 mu = 0
 delta = 0.5
-A = np.full((N,N), 1)
 W = np.random.normal(mu, delta, N)
 w = np.zeros((3,N))
 for i in range(N):
@@ -59,10 +58,10 @@ z0 = np.cos(phi)
 
 init_state = np.append(x0, [y0 , z0])
 #Solução do modelo
-sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W, w), s, init_state)
+sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, W, w), s, init_state)
 #pontos fixos
 chute_inicial = init_state
-pontos_fixos = broyden1(lambda y: kuramoto(s, y, K, N, A, W, w),chute_inicial)
+pontos_fixos = broyden1(lambda y: kuramoto(s, y, K, N, W, w),chute_inicial)
 
 rho = np.zeros(3)
 for i in range(N):

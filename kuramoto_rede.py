@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import networkx as nx
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.integrate import solve_ivp
 from scipy.optimize import broyden1
@@ -8,7 +9,7 @@ from scipy.optimize import broyden1
 
 np.random.seed(137)
 #Modelo de Kuramoto
-def kuramoto(t, y, K, N, W, w):
+def kuramoto(t, y, K, N, A, W, w):
     x = y
     
     dydt = np.zeros(3*N)
@@ -18,7 +19,7 @@ def kuramoto(t, y, K, N, W, w):
         s = 0
         for j in range(N):
             b = np.array([x[j], x[j+N], x[j+2*N]])
-            s = s + (b - np.inner(b,a)*a)
+            s = s + A[i,j]*(b - np.inner(b,a)*a)
             
         dydt[i] = (K/N)*s[0] + np.cross(W[i]*w[:,i],a)[0]
         dydt[i+N] = (K/N)*s[1] + np.cross(W[i]*w[:,i],a)[1]
@@ -32,6 +33,10 @@ s = [0, 300]
 K = 0.08
 mu = 0
 delta = 0.5
+p = 1
+G = nx.gnp_random_graph(N,p)
+A = nx.adjacency_matrix(G).A
+print(A)
 W = np.random.normal(mu, delta, N)
 w = np.zeros((3,N))
 for i in range(N):
@@ -57,10 +62,10 @@ z0 = np.cos(phi)
 
 init_state = np.append(x0, [y0 , z0])
 #Solução do modelo
-sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, W, w), s, init_state)
+sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W, w), s, init_state)
 #pontos fixos
 chute_inicial = init_state
-pontos_fixos = broyden1(lambda y: kuramoto(s, y, K, N, W, w),chute_inicial)
+pontos_fixos = broyden1(lambda y: kuramoto(s, y, K, N, A, W, w),chute_inicial)
 
 rho = np.zeros(3)
 for i in range(N):
@@ -117,7 +122,7 @@ for i in range(int(sol.y.shape[1])):
     ax.plot_wireframe(X, Y, Z, color='0.75', alpha='0.4')
     ax.scatter(x_e,y_e,z_e, c='b', s=50)
     ax.scatter(x_i,y_i,z_i, c='r', s=50)
-    ax.text2D(0.3, 0.2, 'K={}\nN={}\nMean={}\nStdv={}'.format(K,N,mu,delta), transform=ax.transAxes)
+    ax.text2D(0.3, 0.2, 'K={}\nN={}\nMean={}\nStdv={}\nP={}'.format(K,N,mu,delta,p), transform=ax.transAxes)
     plt.axis('off')
     
     for j in range(N):
@@ -127,9 +132,9 @@ for i in range(int(sol.y.shape[1])):
     plt.suptitle('{} individuals - t={}.'.format(N,np.round(sol.t[i],2)), size=40)
     
     if i < 10:
-        plt.savefig('frames02/00{}.png'.format(int(i)))
+        plt.savefig('frames01/00{}.png'.format(int(i)))
     elif 9 < i < 100:
-        plt.savefig('frames02/0{}.png'.format(i))
+        plt.savefig('frames01/0{}.png'.format(i))
     else:
-        plt.savefig('frames02/{}.png'.format(int(i)))
+        plt.savefig('frames01/{}.png'.format(int(i)))
     plt.close()
