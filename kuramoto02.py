@@ -6,6 +6,7 @@ from scipy.optimize import broyden1
 
 #Criar uma pasta chamada frames02 onde o programa estiver salvo para as figuras
 
+np.random.seed(137)
 #Modelo de Kuramoto
 def kuramoto(t, y, K, N, A, W, w):
     x = y
@@ -17,7 +18,7 @@ def kuramoto(t, y, K, N, A, W, w):
         s = 0
         for j in range(N):
             b = np.array([x[j], x[j+N], x[j+2*N]])
-            s = s + b - np.inner(b,a)*a
+            s = s + A[i,j]*(b - np.inner(b,a)*a)
             
         dydt[i] = (K/N)*s[0] + np.cross(W[i]*w[:,i],a)[0]
         dydt[i+N] = (K/N)*s[1] + np.cross(W[i]*w[:,i],a)[1]
@@ -28,24 +29,24 @@ def kuramoto(t, y, K, N, A, W, w):
 #Parâmetros.
 N = 20
 s = [0, 300]
-K = 0.8
+K = 0.08
 mu = 0
 delta = 0.5
 A = np.full((N,N), 1)
 W = np.random.normal(mu, delta, N)
 w = np.zeros((3,N))
-for k in range(N):
-    H = np.full((3,3), W[k])
-    for l in range(3):
-        H[l, l] = 0 
-    for l in range(3):
-        for m in range(3):
-            if l>m:
-                H[l,m] = -H[l,m]
+for i in range(N):
+    H = np.full((3,3), W[i])
+    for j in range(3):
+        H[j, j] = 0 
+    for j in range(3):
+        for k in range(3):
+            if j>k:
+                H[j,k] = -H[j,k]
     L, V = np.linalg.eig(H)
-    for l in range(3):
-        if np.real(L[l])<(10**(-6)) and np.imag(L[l])<(10**(-6)):
-            w[:,k] = V[:,l]
+    for j in range(3):
+        if np.real(L[j])<(10**(-6)) and np.imag(L[j])<(10**(-6)):
+            w[:,i] = V[:,j]
             
 #condição inicial
 theta = np.random.uniform(0, 2*np.pi, N) 
