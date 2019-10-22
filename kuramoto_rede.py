@@ -5,7 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.integrate import solve_ivp
 from scipy.optimize import broyden1
 
-#Criar uma pasta chamada frames02 onde o programa estiver salvo para as figuras
+#Criar uma pasta chamada frames_rede onde o programa estiver salvo para as figuras
 
 np.random.seed(137)
 #Modelo de Kuramoto
@@ -29,14 +29,20 @@ def kuramoto(t, y, K, N, A, W, w):
 
 #Parâmetros.
 N = 20
-s = [0, 300]
+s = [0, 100]
 K = 0.08
 mu = 0
 delta = 0.5
-p = 1
+p = 0.8
 G = nx.gnp_random_graph(N,p)
 A = nx.adjacency_matrix(G).A
-print(A)
+D = np.zeros(N)
+for i in range(N):
+    S=0
+    for j in range(N):
+        S = S+A[i,j]
+    D[i] = S
+print(D)
 W = np.random.normal(mu, delta, N)
 w = np.zeros((3,N))
 for i in range(N):
@@ -132,9 +138,9 @@ for i in range(int(sol.y.shape[1])):
     plt.suptitle('{} individuals - t={}.'.format(N,np.round(sol.t[i],2)), size=40)
     
     if i < 10:
-        plt.savefig('frames01/00{}.png'.format(int(i)))
+        plt.savefig('frames_rede/00{}.png'.format(int(i)))
     elif 9 < i < 100:
-        plt.savefig('frames01/0{}.png'.format(i))
+        plt.savefig('frames_rede/0{}.png'.format(i))
     else:
-        plt.savefig('frames01/{}.png'.format(int(i)))
+        plt.savefig('frames_rede/{}.png'.format(int(i)))
     plt.close()
