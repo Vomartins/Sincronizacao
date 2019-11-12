@@ -28,12 +28,14 @@ def kuramoto(t, y, K, N, A, W, w):
     return dydt
 
 #Parâmetros.
-N = 20
-s = [0, 100]
-K = 0.08
-mu = 0
-delta = 0.5
-p = 0.8
+N = int(input("N= "))
+ti = int(input("ti= "))
+tf = int(input("tf= "))
+s = [ti, tf]
+K = float(input("K= "))
+mu = float(input("mu= "))
+delta = float(input("delta= "))
+p = float(input("p= "))
 G = nx.gnp_random_graph(N,p)
 A = nx.adjacency_matrix(G).A
 D = np.zeros(N)
@@ -42,7 +44,7 @@ for i in range(N):
     for j in range(N):
         S = S+A[i,j]
     D[i] = S
-print(D)
+
 W = np.random.normal(mu, delta, N)
 w = np.zeros((3,N))
 for i in range(N):
