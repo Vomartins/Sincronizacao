@@ -1,0 +1,10 @@
+to do:
+1) script para criar pastas para os frames
+2) script para criar o vídeo
+3) script para apagar a pasta dos frames
+
+4) Kuramoto forçado
+
+5) Stuart-Landau
+
+6) condensar todas as simulações em apenas um script - se não for ruim para o desempenho.
