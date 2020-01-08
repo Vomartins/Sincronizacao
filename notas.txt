@@ -8,3 +8,6 @@ to do:
 5) Stuart-Landau
 
 6) condensar todas as simulações em apenas um script - se não for ruim para o desempenho.
+
+
+#chave SSH configurada.
