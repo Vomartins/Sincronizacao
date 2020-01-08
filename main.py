@@ -1,16 +1,16 @@
 import subprocess as sp
 import os
-import shutil
 
-sp.run(["python.exe","kuramoto_rede.py"])
+sp.Popen(["mkdir","frames_rede"])
+sp.run(["python3","kuramoto_rede.py"])
 os.chdir("frames_rede")
-sp.run("ffmpeg -framerate 5 -i %03d.png simulation.wmv")
+sp.run(["ffmpeg","-framerate","5","-i","%03d.png","simulation.mp4"])
 
 k = 0
 name = '00{}.png'.format(k)
 while os.path.exists(name):
     os.remove(name)
-    
+
     k = k+1
     if k < 10:
         name = '00{}.png'.format(k)
@@ -20,6 +20,8 @@ while os.path.exists(name):
         name = '{}.png'.format(k)
 
 os.chdir("../")
-shutil.move("frames_rede/simulation.wmv", "simulation.wmv")
+sp.Popen(["mv","frames_rede/simulation.mp4","simulation.mp4"])
 
-print('Simulação feita.')
+print('Simulacao feita.')
+
+sp.Popen(["rmdir", "frames_rede"])
