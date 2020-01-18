@@ -1,6 +1,10 @@
 to do:
-1) Kuramoto forçado
+1) Kuramoto forçado.
+1.1) Generalizar a força aplicada.
+1.2) Adicionar matriz adjacência na força. A_2
 
-2) Stuart-Landau
+2) Stuart-Landau.
 
 3) condensar todas as simulações em apenas um script - se não for ruim para o desempenho.
+
+4)Mudar para orientação a objeto.
