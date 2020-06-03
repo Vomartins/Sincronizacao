@@ -1,5 +1,7 @@
 import subprocess as sp
 import os
+
+
 str = str(input("Há uma força externa? (s/n) \n"))
 if str=='s' or str=='S':
     sp.Popen(["mkdir","frames_forc"])

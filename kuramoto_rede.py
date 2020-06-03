@@ -7,21 +7,23 @@ from scipy.optimize import broyden1
 
 np.random.seed(137)
 #Modelo de Kuramoto
-def kuramoto(t, y, K, N, A, W, w):
-    x = y
+def kuramoto(t, y, K, N, A, n_W, w):
+    #x = y
 
     dydt = np.zeros(3*N)
 
     for i in range(N):
-        a = np.array([x[i], x[i+N], x[i+2*N]])
+        a = np.array([y[i], y[i+N], y[i+2*N]])
         s = 0
         for j in range(N):
-            b = np.array([x[j], x[j+N], x[j+2*N]])
+            b = np.array([y[j], y[j+N], y[j+2*N]])
             s = s + A[i,j]*(b - np.inner(b,a)*a)
 
-        dydt[i] = (K/N)*s[0] + np.cross(W[i]*w[:,i],a)[0]
-        dydt[i+N] = (K/N)*s[1] + np.cross(W[i]*w[:,i],a)[1]
-        dydt[i+2*N] = (K/N)*s[2] + np.cross(W[i]*w[:,i],a)[2]
+        #n_W = (W[0,i]**2 + W[1,i]**2 + W[2,i]**2)**(1/2)
+
+        dydt[i] = (K/N)*s[0] + np.cross(n_W[i]*w[:,i],a)[0]
+        dydt[i+N] = (K/N)*s[1] + np.cross(n_W[i]*w[:,i],a)[1]
+        dydt[i+2*N] = (K/N)*s[2] + np.cross(n_W[i]*w[:,i],a)[2]
 
     return dydt
 
@@ -43,9 +45,20 @@ for i in range(N):
         S = S+A[i,j]
     D[i] = S
 
-W = np.random.normal(mu, delta, N)
+W = np.random.normal(mu, delta, (3,N))
 w = np.zeros((3,N))
+n_W = np.zeros(N)
 for i in range(N):
+    
+    H = np.zeros((3,3))
+    
+    H[0,1] = W[0,i]
+    H[0,2] = W[1,i]
+    H[1,2] = W[2,i]
+    H[2,1] = -W[2,i]
+    H[2,0] = -W[1,i]
+    H[1,0] = -W[0,i]
+    '''
     H = np.full((3,3), W[i])
     for j in range(3):
         H[j, j] = 0
@@ -53,10 +66,13 @@ for i in range(N):
         for k in range(3):
             if j>k:
                 H[j,k] = -H[j,k]
+    '''
     L, V = np.linalg.eig(H)
     for j in range(3):
         if np.real(L[j])<(10**(-6)) and np.imag(L[j])<(10**(-6)):
-            w[:,i] = V[:,j]
+            w[:,i] = V[:,j].real.astype(np.float32)
+        else:
+            n_W[i] = np.imag(L[j]) 
 
 #condicao inicial
 theta = np.random.uniform(0, 2*np.pi, N)
@@ -68,16 +84,25 @@ z0 = np.cos(phi)
 
 init_state = np.append(x0, [y0 , z0])
 #Solucao do modelo
-sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, W, w), s, init_state)
+sol = solve_ivp(lambda t, y: kuramoto(t, y, K, N, A, n_W, w), s, init_state)
 #pontos fixos
 chute_inicial = init_state
-pontos_fixos = broyden1(lambda y: kuramoto(s, y, K, N, A, W, w),chute_inicial)
+pontos_fixos = broyden1(lambda y: kuramoto(s, y, K, N, A, n_W, w),chute_inicial)
 
-rho = np.zeros(3)
+rho = np.zeros((3,N))
+for i in range(N):
+    for j in range(N):
+        a = np.array([sol.y[i,-1],sol.y[i+N,-1],sol.y[i+2*N,-1]])
+        rho[:,i] = rho[:,i] + A[i,j]*a
+    rho[:,i] = (1/N)*rho[:,i]
+    print(np.linalg.norm(rho[:,i]))
+
+R = np.zeros(3)
 for i in range(N):
     a = np.array([sol.y[i,-1],sol.y[i+N,-1],sol.y[i+2*N,-1]])
-    rho = rho + a
-rho = (1/N)*rho
+    R = R + a
+R = (1/N)*R
+print(np.linalg.norm(R))
 
 x_i = np.array([])
 y_i = np.array([])
@@ -88,8 +113,8 @@ z_e = np.array([])
 
 for i in range(N):
     a = np.array([pontos_fixos[i],pontos_fixos[i+N],pontos_fixos[i+2*N]])
-    prod_int = np.inner(a,rho)
-    if prod_int < 0 :
+    prod_int = np.inner(a,rho[:,i])
+    if prod_int <= 0 :
         x_i = np.append(x_i, pontos_fixos[i])
         y_i = np.append(y_i, pontos_fixos[i+N])
         z_i = np.append(z_i, pontos_fixos[i+2*N])
@@ -104,7 +129,7 @@ z = np.append(z_i, z_e)
 
 d = np.zeros(N)
 for i in range(N):
-    d[i] = x[i]**2 + y[i]**2 + z[i]**2
+    d[i] = (x[i]**2 + y[i]**2 + z[i]**2)**(1/2)
 print(d)
 
 for i in range(int(sol.y.shape[1])):
