@@ -8,7 +8,6 @@ from scipy.optimize import broyden1
 np.random.seed(137)
 #Modelo de Kuramoto
 def kuramoto(t, y, K, N, A, n_W, w):
-    #x = y
 
     dydt = np.zeros(3*N)
 
@@ -18,8 +17,6 @@ def kuramoto(t, y, K, N, A, n_W, w):
         for j in range(N):
             b = np.array([y[j], y[j+N], y[j+2*N]])
             s = s + A[i,j]*(b - np.inner(b,a)*a)
-
-        #n_W = (W[0,i]**2 + W[1,i]**2 + W[2,i]**2)**(1/2)
 
         dydt[i] = (K/N)*s[0] + np.cross(n_W[i]*w[:,i],a)[0]
         dydt[i+N] = (K/N)*s[1] + np.cross(n_W[i]*w[:,i],a)[1]
@@ -58,21 +55,13 @@ for i in range(N):
     H[2,1] = -W[2,i]
     H[2,0] = -W[1,i]
     H[1,0] = -W[0,i]
-    '''
-    H = np.full((3,3), W[i])
-    for j in range(3):
-        H[j, j] = 0
-    for j in range(3):
-        for k in range(3):
-            if j>k:
-                H[j,k] = -H[j,k]
-    '''
+    
     L, V = np.linalg.eig(H)
     for j in range(3):
-        if np.real(L[j])<(10**(-6)) and np.imag(L[j])<(10**(-6)):
+        if np.abs(np.real(L[j]))<(10**(-6)) and np.abs(np.imag(L[j]))<(10**(-6)):
             w[:,i] = V[:,j].real.astype(np.float32)
         else:
-            n_W[i] = np.imag(L[j]) 
+            n_W[i] = np.imag(L[j])
 
 #condicao inicial
 theta = np.random.uniform(0, 2*np.pi, N)
@@ -114,7 +103,7 @@ z_e = np.array([])
 for i in range(N):
     a = np.array([pontos_fixos[i],pontos_fixos[i+N],pontos_fixos[i+2*N]])
     prod_int = np.inner(a,rho[:,i])
-    if prod_int <= 0 :
+    if prod_int < 0 :
         x_i = np.append(x_i, pontos_fixos[i])
         y_i = np.append(y_i, pontos_fixos[i+N])
         z_i = np.append(z_i, pontos_fixos[i+2*N])
@@ -123,13 +112,13 @@ for i in range(N):
         y_e = np.append(y_e, pontos_fixos[i+N])
         z_e = np.append(z_e, pontos_fixos[i+2*N])
 
-x = np.append(x_i, x_e)
-y = np.append(y_i, y_e)
-z = np.append(z_i, z_e)
+x_ = np.append(x_i, x_e)
+y_ = np.append(y_i, y_e)
+z_ = np.append(z_i, z_e)
 
 d = np.zeros(N)
 for i in range(N):
-    d[i] = (x[i]**2 + y[i]**2 + z[i]**2)**(1/2)
+    d[i] = (x_[i]**2 + y_[i]**2 + z_[i]**2)**(1/2)
 print(d)
 
 for i in range(int(sol.y.shape[1])):
