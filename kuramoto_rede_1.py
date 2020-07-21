@@ -8,32 +8,31 @@ from scipy.optimize import newton_krylov
 
 np.random.seed(121)
 #Modelo de Kuramoto
-def kuramoto(t, y, N, A, D, n_W, w, Theta, Phi):
+def kuramoto(t, y, N, A, D, n_W, w):
 
     dydt = np.zeros(3*N)
 
     W = np.zeros(3)
-    '''
-    a13 = (-1/4)*(np.sin(Theta)*np.cos(Theta)*np.sin(Phi)*np.cos(Phi))/(np.sin(Theta)**2+(np.cos(Theta)**2)*np.sin(Phi))
-    a11 = 1+a13*((np.sin(Theta)*np.cos(Phi))/(np.cos(Theta)*np.sin(Phi)))
-    a13 = a13*(np.sin(Theta)/np.cos(Theta))
-    a23 = (-1/4)*(np.sin(Theta)*np.cos(Theta)*np.sin(Phi)*np.cos(Phi))/(np.sin(Theta)**2+(np.cos(Theta)**2)*np.cos(Phi))
-    a22 = 1+a23*((np.sin(Theta)*np.cos(Phi))/(np.cos(Theta)*np.sin(Phi)))
-    a21 = a23*(np.sin(Theta)/np.cos(Theta))
-    a31 = (-1/4)*(np.cos(Theta)*np.sin(Phi))/(np.sin(Theta)*np.sin(Phi)**2+np.cos(Phi)*np.sin(Theta)*np.sin(Phi)+np.cos(Theta))
-    a32 = a31*(np.sin(Theta)/np.cos(Theta))
-    a33 = 1+(a31/np.sin(Phi))
-
-    M = np.array([[a11, a21, a13],[a21, a22, a23], [a31, a32, a33]])
-    '''
-
-    M = np.array([[1, 0, 1],[0, 1, 0], [0, 0, 1]])
+    
+    M = np.array([[1, 0, 0],[0, 1, 0], [0, 0, 1]])
 
     for i in range(N):
         a = np.array([y[i], y[i+N], y[i+2*N]])
+        '''
+        a13 = (-1/4)*(((a[1]**2+a[0]**2)**(1/2)*(a[0]*a[1]*a[2]))/((a[1]**2+a[0]**2)**2+a[2]**2*a[1]**2))
+        a11 = 1+a13*((a[1]**2+a[0]**2)/a[1])
+        a12 = a13*((a[1]**2+a[0]**2)**(1/2)/a[2])
+        a23 = (-1/4)*(((a[1]**2+a[0]**2)**(1/2)*(a[0]*a[1]*a[2]))/((a[1]**2+a[0]**2)**2+a[2]**2*a[0]**2))
+        a22 = 1+a23*((a[1]**2+a[0]**2)/a[1])
+        a21 = a23*((a[1]**2+a[0]**2)**(1/2)/a[2])
+        a31 = (-1/4)*((a[2]*a[1])/((a[1]**2+a[0]**2)**(1/2)*a[2]+a[1]*a[0]+a[1]**2))
+        a32 = a31*((a[1]**2+a[0]**2)**(1/2)/a[2])
+        a33 = 1+a31*((a[1]**2+a[0]**2)**(1/2)/a[1])
+        M = np.array([[a11, a12, a13],[a21, a22, a23], [a31, a32, a33]])
+        '''
         s = 0
         for j in range(N):
-            b = np.dot(M,np.array([y[j], y[j+N], y[j+2*N]]))
+            b = np.dot(10*M,np.array([y[j], y[j+N], y[j+2*N]]))
             s = s + A[i,j]*(b - np.inner(b,a)*a)
         s = s + (a - np.inner(a,a)*a)
         s = (1/N)*s
@@ -51,14 +50,11 @@ N = int(input("N= "))
 ti = int(input("ti= "))
 tf = int(input("tf= "))
 s = [ti, tf]
-Theta = np.pi/4
-Phi = np.pi/4
 mu = float(input("mu= "))
 delta = float(input("delta= "))
 p = float(input("p= "))
 G = nx.gnp_random_graph(N,p)
 A = nx.adjacency_matrix(G).A
-print(A)
 D = np.zeros(N)
 for i in range(N):
     S=0
@@ -98,7 +94,7 @@ z0 = np.cos(phi)
 
 init_state = np.append(x0, [y0 , z0])
 #Solucao do modelo
-sol = solve_ivp(lambda t, y: kuramoto(t, y, N, A, D, n_W, w, Theta, Phi), s, init_state)
+sol = solve_ivp(lambda t, y: kuramoto(t, y, N, A, D, n_W, w), s, init_state)
 
 #Parametros de ordem
 R1 = np.zeros(3)
@@ -181,7 +177,6 @@ for i in range(int(sol.y.shape[1])):
     ax.plot_wireframe(X, Y, Z, color='0.75', alpha='0.4')
     #ax.scatter(x_e,y_e,z_e, c='b', s=50)
     #ax.scatter(x_i,y_i,z_i, c='r', s=50)
-    ax.text2D(0.3, 0.1, 'rho1={}\nrho2={}\ntheta=pi/4\nphi=pi/4\nN={}\nMean={}\nStdv={}\nP={}'.format(np.around(np.linalg.norm(R1),4),np.around(R2,4),N,mu,delta,p), transform=ax.transAxes)
     ax.text2D(0.3, 0.1, 'rho1={}\nrho2={}\nN={}\nMean={}\nStdv={}\nP={}'.format(np.around(np.linalg.norm(R1),4),np.around(R2,4),N,mu,delta,p), transform=ax.transAxes)
     plt.axis('off')
 

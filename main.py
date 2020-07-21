@@ -1,7 +1,6 @@
 import subprocess as sp
 import os
 
-
 pergunta = str(input("Há uma força externa? (s/n) \n"))
 if pergunta=='s' or pergunta=='S':
     print('##################################################\n')
