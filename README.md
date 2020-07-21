@@ -5,4 +5,4 @@ Simulação e análise de sistemas dinâmicos e sincronização.
 
 2)kuramoto_rede.py: Algoritmo de simulação do Modelo de Kuramoto associado a uma rede. O programa consiste em resolver o modelo, calcular os pontos fixos (scipy.optimize.broyden1), classificar os pontos fixos e criar frames para simulaão do modelo (utilizando a equação (2), artigo Ott).
 
-3)Algoritmo de simulação do Modelo de Kuramoto associado a uma rede com uma constante de acoplamento para cada dimensão. O programa consiste em resolver o modelo, calcular os pontos fixos (scipy.optimize.broyden1), classificar os pontos fixos e criar frames para simulaão do modelo (utilizando a equação (2), artigo Ott).
+3)kuramoto_rede_1.py: Algoritmo de simulação do Modelo de Kuramoto associado a uma rede com uma constante de acoplamento para cada dimensão. O programa consiste em resolver o modelo, calcular os pontos fixos (scipy.optimize.broyden1), classificar os pontos fixos e criar frames para simulaão do modelo (utilizando a equação (2), artigo Ott).
