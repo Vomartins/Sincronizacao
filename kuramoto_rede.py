@@ -57,12 +57,12 @@ for i in range(N):
     
     H = np.zeros((3,3))
     
-    H[0,1] = W[0,i]
+    H[0,1] = -W[0,i]
     H[0,2] = W[1,i]
-    H[1,2] = W[2,i]
-    H[2,1] = -W[2,i]
+    H[1,2] = -W[2,i]
+    H[2,1] = W[2,i]
     H[2,0] = -W[1,i]
-    H[1,0] = -W[0,i]
+    H[1,0] = W[0,i]
     
     L, V = np.linalg.eig(H)
     for j in range(3):
@@ -105,7 +105,7 @@ R2 = (1/N)*R2
 print(R2)
 
 #Pontos fixos
-'''
+
 eta = np.random.uniform(0, 2*np.pi, N)
 psi = np.random.uniform(0, np.pi, N)
 
@@ -143,7 +143,7 @@ d = np.zeros(N)
 for i in range(N):
     d[i] = (x_[i]**2 + y_[i]**2 + z_[i]**2)**(1/2)
 print(d)
-'''
+
 for i in range(int(sol.y.shape[1])):
     #Plot dos frames
 
@@ -163,8 +163,8 @@ for i in range(int(sol.y.shape[1])):
     fig = plt.figure(figsize=(10,10))
     ax = fig.gca(projection ='3d')
     ax.plot_wireframe(X, Y, Z, color='0.75', alpha='0.4')
-    #ax.scatter(x_e,y_e,z_e, c='b', s=50)
-    #ax.scatter(x_i,y_i,z_i, c='r', s=50)
+    ax.scatter(x_e,y_e,z_e, c='b', s=50)
+    ax.scatter(x_i,y_i,z_i, c='r', s=50)
     ax.text2D(0.3, 0.2, 'K={}\nN={}\nMean={}\nStdv={}\nP={}'.format(K,N,mu,delta,p), transform=ax.transAxes)
     plt.axis('off')
 
