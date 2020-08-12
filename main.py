@@ -25,10 +25,9 @@ if pergunta=='s' or pergunta=='S':
     os.chdir("../")
     sp.Popen(["mv","frames_forc/simulation.mp4","simulation.mp4"])
 
-    print('Simulacao feita.')
-
     sp.Popen(["rmdir", "frames_forc"])
 
+    print('Simulacao feita.')
 elif pergunta=='n' or pergunta=='N':
     pergunta1 = str(input("Diferentes constantes de acoplamento para cada dimensão? (s/n) \n"))
     if pergunta1=='s' or pergunta1=='S':
@@ -54,10 +53,9 @@ elif pergunta=='n' or pergunta=='N':
         os.chdir("../")
         sp.Popen(["mv","frames_rede_1/simulation.mp4","simulation.mp4"])
 
-        print('Simulacao feita.')
-
         sp.Popen(["rmdir", "frames_rede_1"])
 
+        print('Simulacao feita.')
     elif pergunta1=='n' or pergunta1=='N':
         print('##################################################\n')
         sp.Popen(["mkdir","frames_rede"])
@@ -81,9 +79,9 @@ elif pergunta=='n' or pergunta=='N':
         os.chdir("../")
         sp.Popen(["mv","frames_rede/simulation.mp4","simulation.mp4"])
 
-        print('Simulacao feita.')
-
         sp.Popen(["rmdir", "frames_rede"])
+
+        print('Simulacao feita.')
     else:
         print('##################################################\n')
         print('Opção inválida!')
